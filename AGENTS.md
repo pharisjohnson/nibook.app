@@ -5,7 +5,7 @@
 
 This project uses [InsForge](https://insforge.dev): an all-in-one, open-source Postgres-based backend (BaaS).
 
-- **Project:** **new-app-nibook** (API base `https://sci5cd29.us-east.insforge.app`)
+- **Project:** **new-app-nibook** (API base `https://q777uqjk.us-east.insforge.app`)
 - **Credentials:** app code reads keys from `.env`; the CLI reads `.insforge/project.json`. Never hardcode or commit keys.
 - **Skills:** Use the `insforge` skill for app code (SDK) and `insforge-cli` for backend infrastructure.
 - **Key patterns:**
@@ -19,9 +19,16 @@ This project uses [InsForge](https://insforge.dev): an all-in-one, open-source P
 - Single test: `npx vitest run <test-file>`
 
 ## Architecture
+- Cloudflare Pages is the only deploy target — frontend and API both. There is no Vercel
+  deployment anymore; a previous Vercel/Express backend (`apps/api`) was removed because its
+  serverless function never actually routed in production (every `/api/*` request silently
+  fell through to the static SPA). Do not reintroduce a second backend.
 - Alias `@/` → `src/` (configured in `vite.config.ts` and `tsconfig.json`)
-- Frontend: Cloudflare Pages at https://nibook.pages.dev
-- API: Cloudflare Pages Functions (`functions/api/[[path]].ts`)
+- Frontend: Cloudflare Pages at https://nibook.pages.dev (`apps/landing`, Vite/React)
+- API: Cloudflare Pages Functions (`functions/api/[[path]].ts`), backed by InsForge and an
+  R2 bucket (`NIBOOK_IMAGES`) for uploads, with InsForge storage as a fallback
+- Local dev: `pnpm run dev` (builds `apps/landing` then serves it + `functions/` together via
+  `wrangler pages dev`)
 
 ## Testing
 - Vitest, no external services required
